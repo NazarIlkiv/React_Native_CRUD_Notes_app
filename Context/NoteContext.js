@@ -1,27 +1,48 @@
 import React, {createContext, Component} from 'react';
 import {Alert} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+export const errorHandler = e => {
+  Alert.alert(
+    'Notes Error',
+    `Sorry about the issue: ${e}`[
+      {
+        text: 'okay',
+      }
+    ],
+    {cancel},
+  );
+};
 
 export const NoteContext = createContext();
 
 export class NoteProvider extends Component {
   constructor(props) {
     super(props);
-    this.getContextNotes = () => {
-      return this.state.contextNotes;
+    this.getContextNotes = async () => {
+      try {
+        const storedNotes = AsyncStorage.getItem('@notes');
+        if (storedNotes) {
+          this.setState({contextNotes: [...JSON.parse(storedNotes)]});
+        }
+      } catch {}
     };
     this.addContextNote = newNote => {
       const {contextNotes} = this.state;
       contextNotes.push(newNote);
-      this.setState({
-        contextNotes,
-      });
+      this.setState(
+        {
+          contextNotes,
+        },
+        async () => await this.storeData(),
+      );
     };
     this.updateContextNote = (note, id) => {
       const {contextNotes} = this.state;
       const noteIndex = contextNotes.findIndex(item => item.id === id);
       contextNotes[noteIndex].title = note.title;
       contextNotes[noteIndex].content = note.content;
-      this.setState({contextNotes});
+      this.setState({contextNotes}, async () => await this.storeData());
     };
     this.deleteContextNote = id => {
       const {contextNotes: oldNotes} = this.state;
@@ -36,6 +57,17 @@ export class NoteProvider extends Component {
       contextNotes: [],
     };
   }
+
+  storeData = async () => {
+    try {
+      await AsyncStorage.setItem(
+        'notes',
+        JSON.stringify([...this.state.contextNotes]),
+      );
+    } catch (error) {
+      errorHandler(error);
+    }
+  };
 
   render() {
     <NoteContext.Provider value={this.state}>
