@@ -4,6 +4,7 @@ import {
   Header,
   Footer,
   FooterTab,
+  Title,
   Left,
   Right,
   Body,

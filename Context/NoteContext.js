@@ -1,4 +1,4 @@
-import React, {createContext, Component} from 'react';
+import React, {createContext, Component, useRef} from 'react';
 import {Alert} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -70,8 +70,10 @@ export class NoteProvider extends Component {
   };
 
   render() {
-    <NoteContext.Provider value={this.state}>
-      {this.props.children}
-    </NoteContext.Provider>;
+    return (
+      <NoteContext.Provider value={this.state}>
+        {this.props.children}
+      </NoteContext.Provider>
+    );
   }
 }
